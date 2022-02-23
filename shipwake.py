@@ -9,8 +9,8 @@ plt.ion()
 param = namelist.Namelist()
 param.typewave = 'gwlong'
 
-
-param.nx, param.ny = 128*8, 128*4
+size = 128
+param.nx, param.ny = size*8, size*4
 param.Lx, param.Ly = 2, 1
 param.g = 1.
 param.H = .1

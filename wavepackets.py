@@ -1,4 +1,9 @@
-import numpy as np
+import wave2d_config as wc
+
+if wc.use_cupy:
+    import cupy as np
+else:
+    import numpy as np
 
 def square(xr, yr, sigma):
     phi = np.zeros_like(xr)

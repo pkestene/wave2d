@@ -7,6 +7,8 @@ import wavepackets as wp
 import nc_tools as nct
 from netCDF4 import Dataset
 
+import wave2d_config as wc
+
 import matplotlib.pyplot as plt
 plt.ion()
 
@@ -66,7 +68,10 @@ class Wave2d(object):
                 self.plot.init_figure(self.phi0, u=var['up'], v=var['vp'])
 
             else:
-                self.plot.init_figure(self.phi0)
+                if wc.use_cupy:
+                    self.plot.init_figure(self.phi0.get())
+                else:
+                    self.plot.init_figure(self.phi0)
 
         tend = param.tend
         dt = param.dt
@@ -160,7 +165,12 @@ class Wave2d(object):
             if anim:
                 if (kt % kplot == 0):
                     var = self.fspace.compute_all_variables(hphi)
-                    z2d = var[param.varplot]
+
+                    if wc.use_cupy:
+                        z2d = var[param.varplot].get()
+                    else:
+                        z2d = var[param.varplot]
+                    
                     self.var = var
                     if param.plotvector == 'velocity':
                         self.plot.update(kt, time, z2d, u=var['u'], v=var['v'])
@@ -175,7 +185,10 @@ class Wave2d(object):
                             nc.variables["time"][ktio] = time
                             nc.variables["p"][ktio, :, :] = z2d
                             for v in ["u", "v", "up", "vp"]:
-                                nc.variables[v][ktio, :, :] = var[v]
+                                if wc.use_cupy:
+                                    nc.variables[v][ktio, :, :] = var[v].get()
+                                else:
+                                    nc.variables[v][ktio, :, :] = var[v]
 
                             ktio += 1
             else:
